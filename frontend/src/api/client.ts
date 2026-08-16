@@ -1,4 +1,5 @@
-const BASE = "/api";
+const BASE =
+  "https://applypilot-ai-backend-1.onrender.com/api";
 
 /* =========================================================
    REQUEST HEADERS
