@@ -29,6 +29,14 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  res.json({
+    service: "ApplyPilot AI",
+    status: "running",
+    message: "ApplyPilot AI backend is live.",
+  });
+});
+
 app.get(
   "/api/health",
   (req, res) => {
