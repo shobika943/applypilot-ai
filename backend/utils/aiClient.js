@@ -24,7 +24,7 @@ function getConfig() {
 
   // Use a model that can be changed from .env.
   const model =
-    process.env.GEMINI_MODEL || "gemini-2.0-flash";
+    process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 
   return {
     apiKey,
