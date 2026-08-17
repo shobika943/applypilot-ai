@@ -8,17 +8,25 @@ const BASE =
 function buildHeaders(
   options: RequestInit
 ): Headers {
-  const headers = new Headers();
+  const headers =
+    new Headers();
 
-  // Do not add JSON content type for FormData.
-  if (!(options.body instanceof FormData)) {
+  /*
+   * Do not add JSON content type
+   * for FormData requests.
+   */
+  if (
+    !(options.body instanceof FormData)
+  ) {
     headers.set(
       "Content-Type",
       "application/json"
     );
   }
 
-  // Add logged-in user token.
+  /*
+   * Add logged-in user's JWT.
+   */
   const token =
     localStorage.getItem("token");
 
@@ -29,14 +37,21 @@ function buildHeaders(
     );
   }
 
-  // Preserve any custom headers.
+  /*
+   * Preserve custom headers.
+   */
   if (options.headers) {
     const customHeaders =
-      new Headers(options.headers);
+      new Headers(
+        options.headers
+      );
 
     customHeaders.forEach(
       (value, key) => {
-        headers.set(key, value);
+        headers.set(
+          key,
+          value
+        );
       }
     );
   }
@@ -52,26 +67,57 @@ async function request(
   path: string,
   options: RequestInit = {}
 ) {
+  const method =
+    (
+      options.method ||
+      "GET"
+    ).toUpperCase();
+
+  const requestOptions: RequestInit = {
+    ...options,
+
+    /*
+     * Prevent browser caching for GET
+     * requests.
+     */
+    cache:
+      method === "GET"
+        ? "no-store"
+        : options.cache,
+
+    headers:
+      buildHeaders(
+        options
+      ),
+  };
+
   const response =
     await fetch(
       `${BASE}${path}`,
-      {
-        ...options,
-        headers:
-          buildHeaders(options),
-      }
+      requestOptions
     );
+
+  /*
+   * 204 means there is no response body.
+   */
+  if (
+    response.status === 204
+  ) {
+    return {};
+  }
 
   const data =
     await response
       .json()
-      .catch(() => ({}));
+      .catch(
+        () => ({})
+      );
 
   if (!response.ok) {
     throw new Error(
       data?.error ||
         data?.message ||
-        "Request failed"
+        `Request failed (${response.status})`
     );
   }
 
@@ -95,7 +141,9 @@ export const api = {
       {
         method: "POST",
         body:
-          JSON.stringify(body),
+          JSON.stringify(
+            body
+          ),
       }
     ),
 
@@ -107,7 +155,9 @@ export const api = {
       {
         method: "POST",
         body:
-          JSON.stringify(body),
+          JSON.stringify(
+            body
+          ),
       }
     ),
 
@@ -218,14 +268,28 @@ export const api = {
       String(page)
     );
 
-    if (query.trim()) {
+    /*
+     * Prevent cached job-search responses.
+     */
+    params.set(
+      "_ts",
+      String(
+        Date.now()
+      )
+    );
+
+    if (
+      query.trim()
+    ) {
       params.set(
         "query",
         query.trim()
       );
     }
 
-    if (role.trim()) {
+    if (
+      role.trim()
+    ) {
       params.set(
         "role",
         role.trim()
@@ -242,14 +306,20 @@ export const api = {
       );
     }
 
-    if (workType.length > 0) {
+    if (
+      workType.length >
+      0
+    ) {
       params.set(
         "workType",
         workType.join(",")
       );
     }
 
-    if (locations.length > 0) {
+    if (
+      locations.length >
+      0
+    ) {
       params.set(
         "location",
         locations.join(",")
@@ -269,7 +339,9 @@ export const api = {
       {
         method: "POST",
         body:
-          JSON.stringify(body),
+          JSON.stringify(
+            body
+          ),
       }
     ),
 
@@ -366,17 +438,6 @@ export const api = {
      MOCK INTERVIEW
      ======================================================= */
 
-  /**
-   * Start or resume a mock interview.
-   *
-   * false:
-   * Reuse the latest existing unfinished
-   * session for this Interview Kit.
-   *
-   * true:
-   * Explicitly create a brand-new
-   * 10-question practice session.
-   */
   startMockInterview: (
     guideId: string,
     newSession: boolean = false
@@ -392,9 +453,6 @@ export const api = {
       }
     ),
 
-  /**
-   * Get a saved mock interview session.
-   */
   getMockSession: (
     mockId: string
   ) =>
@@ -402,9 +460,6 @@ export const api = {
       `/mock-interview/session/${mockId}`
     ),
 
-  /**
-   * Submit one answer.
-   */
   submitAnswer: (
     mockId: string,
     answer: string
@@ -420,9 +475,6 @@ export const api = {
       }
     ),
 
-  /**
-   * Get final report.
-   */
   getReport: (
     mockId: string
   ) =>
